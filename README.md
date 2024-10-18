@@ -1,5 +1,19 @@
 # chromedriver
 
+
+chrome  130.0.6723.58  版本 webdriver 下载 （chrome driver  130.0.6723.58 download)
+
+chromedriver	win32
+
+chromedriver  win64
+
+chromedriver	linux64
+
+chromedriver	mac-arm64
+
+chromedriver	mac-x64
+
+
 chrome  129.0.6668.58  版本 webdriver 下载 （chrome driver  129.0.6668.58 download)
 
 chromedriver	win32
