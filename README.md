@@ -1,6 +1,19 @@
 # chromedriver
 
 
+chrome 141.0.7390.65  版本 webdriver 下载 （chrome driver  141.0.7390.65   download)
+
+chromedriver	win32
+
+chromedriver  win64
+
+chromedriver	linux64
+
+chromedriver	mac-arm64
+
+chromedriver	mac-x64
+
+
 chrome  140.0.7339.80   版本 webdriver 下载 （chrome driver  140.0.7339.80  download)
 
 chromedriver	win32
