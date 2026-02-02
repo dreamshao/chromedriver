@@ -25,7 +25,7 @@ def get_stable_chromedriver_data():
 
 def update_readme(version):
     """在 README.md 的顶部（标题下方）插入新版本，保留旧版本"""
-    header_text = "# ChromeDriver"
+    header_text = "# chromedriver"
     
     # 1. 准备新版本的内容块
     new_entry = f"""
@@ -109,5 +109,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
