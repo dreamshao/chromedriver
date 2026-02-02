@@ -24,7 +24,9 @@ def get_stable_chromedriver_data():
     return None
 
 def update_readme(version):
-    """在 README.md 的原有内容基础上增加新版本信息"""
+    """在 README.md 的顶部（标题下方）插入新版本，保留旧版本"""
+    header_text = "# ChromeDriver"
+    
     # 1. 准备新版本的内容块
     new_entry = f"""
 ## chrome {version} 版本 webdriver 下载 （chrome driver {version} download）
@@ -35,26 +37,28 @@ def update_readme(version):
 * [chromedriver mac-arm64](./{version}%20chromedriver-mac-arm64.zip)
 * [chromedriver mac-x64](./{version}%20chromedriver-mac-x64.zip)
 
----
-"""
-    
+---"""
+
     # 2. 读取现有内容
     old_content = ""
     if os.path.exists("README.md"):
         with open("README.md", "r", encoding="utf-8") as f:
-            old_content = f.read()
-    
-    # 3. 如果是第一次创建，加上标题
-    if "# Chrome Driver 自动更新站" not in old_content:
-        header = "# Chrome Driver"
-        final_content = header + new_entry
-    else:
-        # 4. 如果已有内容，将新内容插入到标题之后
-        # 假设标题占第一行，我们在标题后面插入新条目
-        header_end_index = old_content.find("\n") + 1
-        final_content = old_content[:header_end_index] + new_entry + old_content[header_end_index:]
+            old_content = f.read().strip()
 
-    # 5. 写回文件
+    # 3. 逻辑判断：如果文件为空或标题不存在
+    if header_text not in old_content:
+        # 初始状态：标题 + 新内容
+        final_content = f"{header_text}\n{new_entry}"
+    else:
+        # 核心逻辑：在标题行之后插入新内容，保留后面的旧内容
+        # 找到标题所在的行尾位置
+        header_end_index = old_content.find(header_text) + len(header_text)
+        
+        # 拼接：标题 + 新条目 + 之前的全部内容
+        # old_content[header_end_index:] 是原来标题之后的所有历史版本
+        final_content = old_content[:header_end_index] + "\n" + new_entry + old_content[header_end_index:]
+
+    # 4. 写回文件
     with open("README.md", "w", encoding="utf-8") as f:
         f.write(final_content)
 
@@ -105,4 +109,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
