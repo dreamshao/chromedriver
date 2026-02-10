@@ -1,0 +1,17 @@
+name: Tag Triggered Release
+on:
+  push:
+    tags:
+      - 'v*' # 推送 v 开头的标签就会触发
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload Assets to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*.zip" 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
