@@ -1,5 +1,15 @@
 # chromedriver
 
+# 本项目中的ChromeDriver均来自官网收集,目前已经发布到PyPI, 大家可以通过 pip install chromedriver-sync 实现自动化匹配本地chrome版本从而自动下载
+
+## The ChromeDriver in this project is collected from the official website and has been released to PyPI. You can use pip install chromedriver-sync to automatically match the local chrome version and download it automatically.
+
+[![PyPI version](https://img.shields.io/pypi/v/chromedriver-sync.svg)](https://pypi.org/project/chromedriver-sync/)
+[![Downloads](https://static.pepy.tech/badge/chromedriver-sync)](https://pepy.tech/project/chromedriver-sync)
+
+
+
+
 ## chrome 145.0.7632.46 版本 webdriver 下载 （chrome driver 145.0.7632.46 download）
 
 * [chromedriver win32](./145.0.7632.46%20chromedriver-win32.zip)
