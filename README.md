@@ -7,7 +7,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/chromedriver-sync.svg)](https://pypi.org/project/chromedriver-sync/)
 [![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync.svg)](https://pypi.org/project/chromedriver-sync/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Download Stats](https://static.pepy.tech/project/chromedriver-sync/month/line.png)
+[![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync?label=Downloads&color=blue)](https://pepy.tech/project/chromedriver-sync)
 
 
 
