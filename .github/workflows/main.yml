@@ -21,4 +21,4 @@ jobs:
           files: "*.zip"
           generate_release_notes: true # 自动生成版本说明，列出新增的提交
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_PAT  }}
