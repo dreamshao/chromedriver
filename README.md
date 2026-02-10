@@ -4,8 +4,8 @@
 
 ## The ChromeDriver in this project is collected from the official website and has been released to PyPI. You can use pip install chromedriver-sync to automatically match the local chrome version and download it automatically.
 
-[![PyPI version](https://img.shields.io/pypi/v/chromedriver-sync.svg)](https://pypi.org/project/chromedriver-sync/1.0.1/)
-[![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync.svg)](https://pypi.org/project/chromedriver-sync/1.0.1/)
+[![PyPI version](https://img.shields.io/pypi/v/chromedriver-sync.svg?cacheSeconds=3600)](https://pypi.org/project/chromedriver-sync/1.0.1/)
+[![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync.svg?cacheSeconds=3600)](https://pypi.org/project/chromedriver-sync/1.0.1/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync?label=Downloads&color=blue)](https://pypi.org/project/chromedriver-sync/1.0.1/)
 
