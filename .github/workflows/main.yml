@@ -2,7 +2,7 @@ name: Tag or Manual Release
 on:
   push:
     tags:
-      - 'v*' # 只要你推送 v 开头的标签就会触发（自动化）
+      - 'v*' # 推送 v 开头的标签就会触发（自动化）
   workflow_dispatch: # 允许在 GitHub Actions 页面手动点击运行（手动）
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           # 如果是手动触发，我们需要指定一个默认的标签名，否则会报错
-          # 这里使用了逻辑判断：如果是标签触发就用标签名，如果是手动触发就叫 manual-release
+          # 如果是标签触发就用标签名，如果是手动触发就叫 manual-release
           tag_name: ${{ github.ref_name }}
           files: "*.zip"
           generate_release_notes: true # 自动生成版本说明，列出新增的提交
