@@ -14,7 +14,6 @@ jobs:
       github.event_name == 'workflow_dispatch'
     
     runs-on: ubuntu-latest
-    # 核心修复：显式给 GITHUB_TOKEN 写入权限
     permissions:
       contents: write
       
@@ -24,32 +23,33 @@ jobs:
 
       - name: Sync Files to "main" Release
         env:
-          # 修复：使用内置的 GITHUB_TOKEN，避免 MY_PAT 权限或拼写问题
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: "main"
         run: |
-          # 1. 确保 Release "main" 存在
+          # 1. 确保 Release 存在
           if ! gh release view $RELEASE_TAG > /dev/null 2>&1; then
             echo "[*] 创建新的 Release: $RELEASE_TAG"
-            gh release create $RELEASE_TAG --title "Driver Collection (Main)" --notes "自动更新的驱动集合"
+            gh release create $RELEASE_TAG --title "Driver Collection" --notes "增量更新仓库"
           fi
 
-          # 2. 获取当前 Release 中已有的文件名列表
-          echo "[*] 获取已发布文件清单..."
-          EXISTING_ASSETS=$(gh release view $RELEASE_TAG --json assets --jq '.assets[].name' || echo "")
+          # 2. 获取清单（增加容错处理）
+          echo "[*] 正在同步远程文件列表..."
+          gh release view $RELEASE_TAG --json assets --jq '.assets[].name' > remote_assets.txt || touch remote_assets.txt
 
-          # 3. 遍历本地所有 zip 文件进行校验
-          for file in *.zip; do
-            if [ ! -f "$file" ]; then continue; fi
+          # 3. 逐一校验并上传
+          # 使用 find 处理可能包含空格的文件名
+          find . -maxdepth 1 -name "*.zip" -type f | while read -r file; do
+            filename=$(basename "$file")
             
-            # 使用精准匹配过滤文件名
-            if echo "$EXISTING_ASSETS" | grep -qxF "$file"; then
-              echo "[跳过] 文件已存在: $file"
+            if grep -qxF "$filename" remote_assets.txt; then
+              echo "[跳过] $filename 已存在于 Release 中"
             else
-              echo "[上传] 发现新文件: $file"
-              gh release upload $RELEASE_TAG "$file"
+              echo "[尝试上传] $filename ..."
+              # 使用 --clobber 会覆盖，不加则会报错。
+              # 我们配合 || true 即使服务端瞬时报错（例如并发冲突）也不中断后续文件上传
+              gh release upload $RELEASE_TAG "$file" || echo "[警告] $filename 上传失败（可能已存在或网络波动）"
             fi
           done
 
       - name: Final Summary
-        run: echo "同步任务完成。所有新驱动已增量更新至 'main' Release。"
+        run: echo "同步任务执行完毕。"
