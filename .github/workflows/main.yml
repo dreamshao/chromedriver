@@ -1,4 +1,4 @@
-name: Force Update Release
+name: Incremental Release Manager
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    # 触发条件：提交信息包含 v 或 V，或者是手动触发
+    # 校验提交信息：包含 v 或 V 才会执行
     if: |
       contains(github.event.head_commit.message, 'v') || 
       contains(github.event.head_commit.message, 'V') ||
@@ -18,40 +18,34 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 获取完整历史以操作标签
 
-      - name: Extract Version
-        id: get_version
-        run: |
-          # 从提交信息提取版本号 (如 v145)
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          VERSION=$(echo "$COMMIT_MSG" | grep -oEi 'v[0-9.]+' | head -1 || echo "")
-          
-          # 手动触发或未匹配到时的备用方案
-          if [ -z "$VERSION" ]; then
-            VERSION="v-manual"
-          fi
-          
-          echo "VERSION_TAG=$VERSION" >> $GITHUB_OUTPUT
-          echo "[*] Target Version: $VERSION"
-
-      - name: Delete Old Release and Tag
-        uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          # 修正：通过 github_token 参数传递，不再使用环境变量
-          github_token: ${{ secrets.MY_PAT }}
-          tag_name: ${{ steps.get_version.outputs.VERSION_TAG }}
-          delete_release: true
-        # 即使没有旧版本可以删除（第一次发布），也继续执行后续步骤
-        continue-on-error: true
-
-      - name: Upload New Assets to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.get_version.outputs.VERSION_TAG }}
-          files: "*.zip"
-          overwrite: true # 双重保险，确保覆盖
-          generate_release_notes: true
+      - name: Sync Files to "main" Release
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+          GH_TOKEN: ${{ secrets.MY_PAT }}
+          RELEASE_TAG: "main"
+        run: |
+          # 1. 确保 Release "main" 存在，如果不存在则创建
+          if ! gh release view $RELEASE_TAG > /dev/null 2>&1; then
+            echo "[*] 创建新的 Release: $RELEASE_TAG"
+            gh release create $RELEASE_TAG --title "Driver Collection (Main)" --notes "自动更新的驱动集合"
+          fi
+
+          # 2. 获取当前 Release 中已有的文件名列表
+          echo "[*] 获取已发布文件清单..."
+          EXISTING_ASSETS=$(gh release view $RELEASE_TAG --json assets --jq '.assets[].name')
+
+          # 3. 遍历本地所有 zip 文件进行校验
+          for file in *.zip; do
+            # 检查文件是否存在
+            if [ ! -f "$file" ]; then continue; fi
+            
+            if echo "$EXISTING_ASSETS" | grep -qxF "$file"; then
+              echo "[跳过] 文件已存在: $file"
+            else
+              echo "[上传] 发现新文件: $file"
+              gh release upload $RELEASE_TAG "$file" --clobber=false
+            fi
+          done
+
+      - name: Final Summary
+        run: echo "同步任务完成。所有新驱动已增量更新至 'main' Release。"
