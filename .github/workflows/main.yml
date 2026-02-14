@@ -1,15 +1,14 @@
-name: Dynamic Release
+name: Force Update Release
 
 on:
   push:
     branches:
       - main
-  # 增加：允许在 GitHub Actions 页面手动点击运行
   workflow_dispatch:
 
 jobs:
   release:
-    # 逻辑更新：提交信息包含 v/V，或者是 手动触发 (workflow_dispatch) 时才执行
+    # 触发条件：包含 v 或 V
     if: |
       contains(github.event.head_commit.message, 'v') || 
       contains(github.event.head_commit.message, 'V') ||
@@ -19,33 +18,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整历史以操作 Tag
 
       - name: Extract Version
         id: get_version
         run: |
-          # 尝试从提交信息提取版本
           COMMIT_MSG="${{ github.event.head_commit.message }}"
           VERSION=$(echo "$COMMIT_MSG" | grep -oEi 'v[0-9.]+' | head -1 || echo "")
-          
-          # 如果是手动触发或没匹配到版本，使用 v + 短哈希作为备用
           if [ -z "$VERSION" ]; then
-            VERSION="v-manual-${GITHUB_SHA:0:7}"
+            VERSION="v-manual"
           fi
-          
           echo "VERSION_TAG=$VERSION" >> $GITHUB_OUTPUT
-          echo "[*] Detected Version: $VERSION"
 
-      - name: Upload Assets to Release
+      # --- 核心步骤：如果存在则删除旧的 Release 和 Tag ---
+      - name: Delete Old Release and Tag
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION_TAG }}
+          # 哪怕不存在也不要报错，直接继续
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+
+      # --- 核心步骤：重新发布最新的文件 ---
+      - name: Upload New Assets to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION_TAG }}
           files: "*.zip"
-          # 不覆盖已有文件
-          overwrite: false
-          # 如果文件重复不报错，不让 Action 变红
-          fail_on_unmatched_files: false
+          # 开启覆盖模式作为双重保险
+          overwrite: true 
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
-        # 双重保险：即使发生 already_exists 错误，流程也显示成功
-        continue-on-error: true
