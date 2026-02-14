@@ -8,23 +8,27 @@ on:
 
 jobs:
   release:
-    # 校验提交信息：包含 v 或 V 才会执行
     if: |
       contains(github.event.head_commit.message, 'v') || 
       contains(github.event.head_commit.message, 'V') ||
       github.event_name == 'workflow_dispatch'
     
     runs-on: ubuntu-latest
+    # 核心修复：显式给 GITHUB_TOKEN 写入权限
+    permissions:
+      contents: write
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Sync Files to "main" Release
         env:
-          GH_TOKEN: ${{ secrets.MY_PAT }}
+          # 修复：使用内置的 GITHUB_TOKEN，避免 MY_PAT 权限或拼写问题
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: "main"
         run: |
-          # 1. 确保 Release "main" 存在，如果不存在则创建
+          # 1. 确保 Release "main" 存在
           if ! gh release view $RELEASE_TAG > /dev/null 2>&1; then
             echo "[*] 创建新的 Release: $RELEASE_TAG"
             gh release create $RELEASE_TAG --title "Driver Collection (Main)" --notes "自动更新的驱动集合"
@@ -32,18 +36,18 @@ jobs:
 
           # 2. 获取当前 Release 中已有的文件名列表
           echo "[*] 获取已发布文件清单..."
-          EXISTING_ASSETS=$(gh release view $RELEASE_TAG --json assets --jq '.assets[].name')
+          EXISTING_ASSETS=$(gh release view $RELEASE_TAG --json assets --jq '.assets[].name' || echo "")
 
           # 3. 遍历本地所有 zip 文件进行校验
           for file in *.zip; do
-            # 检查文件是否存在
             if [ ! -f "$file" ]; then continue; fi
             
+            # 使用精准匹配过滤文件名
             if echo "$EXISTING_ASSETS" | grep -qxF "$file"; then
               echo "[跳过] 文件已存在: $file"
             else
               echo "[上传] 发现新文件: $file"
-              gh release upload $RELEASE_TAG "$file" --clobber=false
+              gh release upload $RELEASE_TAG "$file"
             fi
           done
 
