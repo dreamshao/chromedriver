@@ -1,24 +1,40 @@
-name: Tag or Manual Release
+name: Dynamic Release
+
 on:
   push:
-    tags:
-      - 'v*' # 推送 v 开头的标签就会触发（自动化）
-  workflow_dispatch: # 允许在 GitHub Actions 页面手动点击运行（手动）
+    branches:
+      - main
 
 jobs:
   release:
+    # 校验提交信息：包含 v 或 V 才会执行
+    if: contains(github.event.head_commit.message, 'v') || contains(github.event.head_commit.message, 'V')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Extract Version
+        id: get_version
+        run: |
+          # 从提交信息中匹配 v 开头的版本号，例如 "update v144.1" 提取出 v144.1
+          # 如果没匹配到，则使用 v + 短哈希作为备用 Tag
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | grep -oEi 'v[0-9.]+' | head -1 || echo "v-${{ github.sha }}")
+          echo "VERSION_TAG=$VERSION" >> $GITHUB_OUTPUT
+          echo "[*] Detected Version: $VERSION"
+
       - name: Upload Assets to Release
         uses: softprops/action-gh-release@v1
         with:
-          # 如果是手动触发，我们需要指定一个默认的标签名，否则会报错
-          # 如果是标签触发就用标签名，如果是手动触发就叫 manual-release
-          tag_name: ${{ github.ref_name }}
+          # 使用提取到的动态版本号，避免撞车
+          tag_name: ${{ steps.get_version.outputs.VERSION_TAG }}
           files: "*.zip"
-          generate_release_notes: true # 自动生成版本说明，列出新增的提交
+          # 如果这个 Tag 已经存在，是否覆盖同名文件？
+          # true = 覆盖旧文件，不再报错 already_exists
+          # false = 如果已存在则不处理
+          overwrite: false
+          # 2. 关键：如果文件已存在，不要让 Action 报错失败
+          fail_on_unmatched_files: false
+          generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_PAT  }}
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
