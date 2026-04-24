@@ -12,6 +12,16 @@ pip install chromedriver-sync
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/pypi/dm/chromedriver-sync?label=Downloads&color=blue)](https://pypi.org/project/chromedriver-sync/1.0.1/)
 
+## chrome 148.0.7778.56 版本 webdriver 下载 （chrome driver 148.0.7778.56 download）
+
+* [chromedriver win32](./148.0.7778.56%20chromedriver-win32.zip)
+* [chromedriver win64](./148.0.7778.56%20chromedriver-win64.zip)
+* [chromedriver linux64](./148.0.7778.56%20chromedriver-linux64.zip)
+* [chromedriver mac-arm64](./148.0.7778.56%20chromedriver-mac-arm64.zip)
+* [chromedriver mac-x64](./148.0.7778.56%20chromedriver-mac-x64.zip)
+
+---
+
 ## chrome 147.0.7727.117 版本 webdriver 下载 （chrome driver 147.0.7727.117 download）
 
 * [chromedriver win32](./147.0.7727.117%20chromedriver-win32.zip)
